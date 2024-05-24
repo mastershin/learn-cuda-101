@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Reference: https://github.com/nvidia/cuda-samples
 
 # Check for g++ compiler
 if ! command -v g++ >/dev/null 2>&1; then
@@ -24,7 +23,7 @@ else
 fi
 
 # fma: fused multiply-add
-g++ --std=c++23 -mavx -mavx2 -mavx512f -mfma matmul_cpu_avx.cpp -o matmul_cpu_avx.ex
+g++ --std=c++17 -mavx -mavx2 -mavx512f -mfma matmul_cpu_avx.cpp -o matmul_cpu_avx.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU (AVX=$1) executables..."

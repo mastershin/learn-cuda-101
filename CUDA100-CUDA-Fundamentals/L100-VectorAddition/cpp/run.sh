@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Reference: https://github.com/nvidia/cuda-samples
 
-./run-cpu-intel.sh
+./run-cpu.sh
 
 ./run-cpu-avx.sh
 

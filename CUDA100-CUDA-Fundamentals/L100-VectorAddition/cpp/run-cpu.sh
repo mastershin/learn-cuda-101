@@ -11,7 +11,7 @@ if ! command -v g++ >/dev/null 2>&1; then
 fi
 
 echo "g++ found. Compiling CPU code..."
-g++ --std=c++23 vector_add_cpu.cpp -o vector_add_cpu.ex
+g++ --std=c++17 vector_add_cpu.cpp -o vector_add_cpu.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU executables..."
