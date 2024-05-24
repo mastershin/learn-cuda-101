@@ -10,22 +10,10 @@ if ! command -v g++ >/dev/null 2>&1; then
   exit 1
 fi
 
-# Check for nvcc compiler
-if ! command -v nvcc >/dev/null 2>&1; then
-  echo "nvcc not found. Please install the CUDA Toolkit from NVIDIA."
-  echo "Visit: https://developer.nvidia.com/cuda-downloads"
-  exit 1
-fi
-
 echo "g++ found. Compiling CPU code..."
-g++ vector_add_cpu.cpp -o vector_add_cpu.ex
-
-echo "nvcc found. Compiling GPU code..."
-nvcc vector_add_gpu.cu -o vector_add_gpu.ex
+g++ --std=c++23 matmul_cpu.cpp -o matmul_cpu.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU executables..."
-./vector_add_cpu.ex
+./matmul_cpu.ex
 
-echo "Running GPU executables..."
-./vector_add_gpu.ex

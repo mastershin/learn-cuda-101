@@ -1,53 +1,91 @@
 #include <iostream>
 #include <chrono>
+#include <ranges>
 
-#define SIZE 1000 * 1000 * 10
-#define LOOP 100
+// 1000 * 1000 * 200 (float) --> takes about ~2 GB of memory
+#define SIZE 1000 * 1000 * 200
+#define LOOP 20
 
-// CPU vector addition
-void cpuVectorAdd(int *a, int *b, int *c, int size)
+using namespace std;
+using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+time_point now()
+{
+    return std::chrono::high_resolution_clock::now();
+}
+
+auto time_diff(time_point a, time_point b)
+{
+    // Return Type: std::chrono::duration<double>
+    return chrono::duration_cast<std::chrono::duration<double>>(b - a);
+}
+
+// Classic CPU vector addition using for loop (slow)
+void cpuVectorAdd(float a, float *x, float *y, float *out, int size)
 {
     for (int i = 0; i < size; i++)
     {
-        c[i] = a[i] + b[i];
+        out[i] = x[i] + y[i];
+    }
+}
+
+void cpuVectorAdd_pointer(float a, float *x, float *y, float *out, int size)
+{
+    // this function uses pointers
+    // for speed gain (~25%), but could be considered unsafe.
+    for (int i = 0; i < size; i++)
+    {
+        *out = *x + *y;
+        out++;
+    }
+}
+
+void initialize_data(float *x, float *y, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        x[i] = i;
+        y[i] = i * 2;
     }
 }
 
 int main()
 {
-    int *a = new int[SIZE];
-    int *b = new int[SIZE];
-    // Allocate memory for vector b
-    // Initialize vector b
-    for (int i = 0; i < SIZE; i++)
-    {
-        b[i] = i * 2;
-    }
-    int *c = new int[SIZE];
+    // Allocate memory for vector a and b
+    float a = 2.0;
+    float *x = new float[SIZE];
+    float *y = new float[SIZE];
 
     // Initialize vectors a and b
-    for (int i = 0; i < SIZE; i++)
-    {
-        a[i] = i;
-        b[i] = i * 2;
-    }
+    initialize_data(x, y, SIZE);
+
+    float *out = new float[SIZE]{0.0f};
 
     // CPU vector addition
-    auto start_cpu = std::chrono::high_resolution_clock::now();
+    auto start_cpu = now();
 
     for (int i = 0; i < LOOP; i++)
     {
-        cpuVectorAdd(a, b, c, SIZE);
+        cout << "." << flush;
+        cpuVectorAdd(a, x, y, out, SIZE);
     }
-    auto end_cpu = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> cpu_duration = end_cpu - start_cpu;
+    auto end_cpu = now();
+    chrono::duration<double> cpu_duration = end_cpu - start_cpu;
 
-    std::cout << "CPU time: " << cpu_duration.count() << " seconds" << std::endl;
+    cout << endl;
+    cout << "CPU time: " << cpu_duration.count() << " seconds" << std::endl;
+
+    // Calculate the sum using a loop
+    float sum = 0.0f;
+    for (int i = 0; i < SIZE; ++i) {
+        sum += out[i];
+    }
+    cout << "Sum: " << sum << endl;
 
     // Clean up
-    delete[] a;
-    delete[] b;
-    delete[] c;
+    delete[] x;
+    delete[] y;
+    delete[] out;
 
     return 0;
 }

@@ -2,85 +2,171 @@
 #include <chrono>
 #include <cuda_runtime.h>
 
-#define SIZE 1000 * 1000 * 10
+#define SIZE 1000 * 1000 * 200
+#define LOOP 20
+
 #define BLOCK_SIZE 256
-#define LOOP 100
+
+using namespace std;
+// Utility function to get the current time in seconds
+using time_point = chrono::time_point<chrono::high_resolution_clock>;
+
+time_point now()
+{
+    return chrono::high_resolution_clock::now();
+}
+auto time_diff(time_point a, time_point b)
+{
+    // Return Type: std::chrono::duration<double>
+    return chrono::duration_cast<std::chrono::duration<double>>(b - a);
+}
 
 // GPU kernel for vector addition
-__global__ void gpuVectorAdd(int *a, int *b, int *c, int size)
+__global__ void gpuVectorAdd(int a, int *x, int *y, int *out, int size)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx < size)
     {
-        c[idx] = a[idx] + b[idx];
+        out[idx] = a * x[idx] + y[idx];
+    }
+}
+__global__ void gpuVectorAdd(float a, float *x, float *y, float *out, int size)
+{
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size)
+    {
+        out[idx] = a * x[idx] + y[idx];
     }
 }
 
 // Function to perform vector addition on the GPU
-void performVectorAddition(int *a, int *b, int *c, int size)
+template<typename T> class VectorAdditionCUDA
 {
-    // Allocate memory for arrays d_a, d_b, and d_c on the device
-    int *d_a, *d_b, *d_c;
-    cudaMalloc((void **)&d_a, size * sizeof(int));
-    cudaMalloc((void **)&d_b, size * sizeof(int));
-    cudaMalloc((void **)&d_c, size * sizeof(int));
+private:
+    T *d_x = NULL;
+    T *d_y = NULL;
+    T *d_out = NULL;
+    int size; // Store the vector size
 
-    // Copy vectors a and b from host to device
-    cudaMemcpy(d_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
+public:
+    VectorAdditionCUDA(int size) : size(size)
+    {
+        // Allocate device memory with error checking
+        cudaMalloc((void **)&d_x, size * sizeof(T));
+        cudaCheckError("cudaMalloc d_x");
+        cudaMalloc((void **)&d_y, size * sizeof(T));
+        cudaCheckError("cudaMalloc d_y");
+        cudaMalloc((void **)&d_out, size * sizeof(T));
+        cudaCheckError("cudaMalloc d_out");
+    }
 
-    // Calculate the number of blocks needed
-    int numBlocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    ~VectorAdditionCUDA()
+    {
+        // Free device memory with error checking
+        if (d_x)
+        {
+            cudaFree(d_x);
+            cudaCheckError("cudaFree d_x");
+        }
+        if (d_y)
+        {
+            cudaFree(d_y);
+            cudaCheckError("cudaFree d_y");
+        }
+        if (d_out)
+        {
+            cudaFree(d_out);
+            cudaCheckError("cudaFree d_out");
+        }
+    }
 
-    // Launch the GPU kernel for vector addition
-    gpuVectorAdd<<<numBlocks, BLOCK_SIZE>>>(d_a, d_b, d_c, size);
+    void run_kernel(T a, T *x, T *y, T *out)
+    {
+        // Copy vectors x and y from host to device
+        cudaMemcpy(d_x, x, size * sizeof(T), cudaMemcpyHostToDevice);
+        cudaCheckError("cudaMemcpy x");
+        cudaMemcpy(d_y, y, size * sizeof(T), cudaMemcpyHostToDevice);
+        cudaCheckError("cudaMemcpy y");
 
-    // Wait for GPU to finish execution
-    cudaDeviceSynchronize();
+        // Calculate the number of blocks needed
+        int numBlocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-    // Copy vector c from device to host
-    cudaMemcpy(c, d_c, size * sizeof(int), cudaMemcpyDeviceToHost);
+        // Launch the GPU kernel for vector addition with error checking
+        gpuVectorAdd<<<numBlocks, BLOCK_SIZE>>>(a, d_x, d_y, d_out, size);
+        cudaCheckError("kernel launch");
 
-    // Free memory on the device
-    cudaFree(d_a);
-    cudaFree(d_b);
-    cudaFree(d_c);
+        // Wait for GPU to finish execution
+        cudaDeviceSynchronize();
+
+        // Copy vector c from device to host
+        cudaMemcpy(out, d_out, size * sizeof(T), cudaMemcpyDeviceToHost);
+        cudaCheckError("cudaMemcpy out");
+    }
+
+    // Helper function for CUDA error checking
+    inline void cudaCheckError(const char *msg)
+    {
+        cudaError_t err = cudaGetLastError();
+        if (err != cudaSuccess)
+        {
+            std::cerr << "CUDA error: " << msg << " (" << cudaGetErrorString(err) << ")" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+};
+
+void initialize_data(float *x, float *y, int size)
+{
+    for (int i = 0; i < size; i++)
+    {
+        x[i] = i;
+        y[i] = i * 2;
+    }
 }
 
 int main()
 {
     // Allocate memory for arrays a, b, and c on the host
-    int *a = new int[SIZE];
-    int *b = new int[SIZE];
-    int *c = new int[SIZE];
+    float a = 2.0;
+    float *x = new float[SIZE];
+    float *y = new float[SIZE];
+    float *out = new float[SIZE];
 
     // Initialize vectors a and b
-    for (int i = 0; i < SIZE; i++)
-    {
-        a[i] = i;
-        b[i] = i * 2;
-    }
+    initialize_data(x, y, SIZE);
 
     // Call the function to perform vector addition on the GPU
+
     // Start GPU timer
-    auto start_gpu = std::chrono::high_resolution_clock::now();
+    auto start_gpu = now();
+
+    auto vector_add_cuda = VectorAdditionCUDA<float>(SIZE);
 
     for (int i = 0; i < LOOP; i++)
     {
-        performVectorAddition(a, b, c, SIZE);
+        cout << "." << flush;
+        vector_add_cuda.run_kernel(a, x, y, out);
     }
 
     // Stop GPU timer
-    auto end_gpu = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> gpu_duration = end_gpu - start_gpu;
+    auto end_gpu = now();
+    auto gpu_duration = time_diff(start_gpu, end_gpu);
 
     // Print GPU execution time
-    std::cout << "GPU time: " << gpu_duration.count() << " seconds" << std::endl;
+    cout << endl;
+    cout << "GPU time: " << gpu_duration.count() << " seconds" << endl;    
 
+    // Calculate the sum using a loop
+    float sum = 0.0f;
+    for (int i = 0; i < SIZE; ++i) {
+        sum += out[i];
+    }
+    cout << "Sum: " << sum << endl;
+    
     // Clean up memory on the host
-    delete[] a;
-    delete[] b;
-    delete[] c;
+    delete[] x;
+    delete[] y;
+    delete[] out;
 
     return 0;
 }
