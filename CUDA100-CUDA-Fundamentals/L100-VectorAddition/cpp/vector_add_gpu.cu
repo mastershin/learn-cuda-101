@@ -20,14 +20,6 @@ auto time_diff(time_point a, time_point b) {
 }
 
 // GPU kernel for vector addition
-// __global__ void gpuVectorAdd(int *x, int *y, int *out, int size)
-// {
-//     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//     if (idx < size)
-//     {
-//         out[idx] = x[idx] + y[idx];
-//     }
-// }
 __global__ void gpuVectorAdd(const float* x, const float* y, float* out,
                              int size) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -72,7 +64,7 @@ class VectorAdditionCUDA {
     }
   }
 
-  void run_kernel(T a, T* x, T* y, T* out) {
+  void run_kernel(const T* x, const T* y, T* out) {
     // Copy vectors x and y from host to device
     cudaMemcpy(d_x, x, size * sizeof(T), cudaMemcpyHostToDevice);
     cudaCheckError("cudaMemcpy x");
@@ -83,7 +75,7 @@ class VectorAdditionCUDA {
     int numBlocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     // Launch the GPU kernel for vector addition with error checking
-    gpuVectorAdd<<<numBlocks, BLOCK_SIZE>>>(a, d_x, d_y, d_out, size);
+    gpuVectorAdd<<<numBlocks, BLOCK_SIZE>>>(d_x, d_y, d_out, size);
     cudaCheckError("kernel launch");
 
     // Wait for GPU to finish execution
@@ -137,7 +129,7 @@ int main(int argc, char* argv[]) {
 
   for (int i = 0; i < loop; i++) {
     cout << "." << flush;
-    vector_add_cuda.run_kernel(x, y, out);
+    vector_add_cuda.run_kernel((const float*)x, (const float*)y, out);
   }
 
   // Stop GPU timer

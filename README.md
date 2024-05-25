@@ -13,7 +13,7 @@
     * C/C++: Explore different reduction approaches.
     * Rust: Use Rayon for parallel iteration and reduction.
 
-# Image Processing (Tie in JavaScript for Visualization)**
+# Image Processing
 
 4. **Image Blur:**  Apply a convolution filter (like a Gaussian blur) to an image, highlighting parallel image processing concepts. 
     * Python:  Use libraries like OpenCV with CUDA support.
