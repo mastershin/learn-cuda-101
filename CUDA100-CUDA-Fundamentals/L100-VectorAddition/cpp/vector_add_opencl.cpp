@@ -17,7 +17,7 @@ but Apple has deprecated the API and recommends migrating to Metal and Metal Per
 #include <cl/opencl.hpp>
 
 #define SIZE (1000 * 1000 * 200)
-#define LOOP 20
+#define LOOP 50
 
 using namespace std;
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;

@@ -1,9 +1,9 @@
 #include <cuda_runtime.h>
 #include <chrono>
+#include <cstdlib>  // For atoi
 #include <iostream>
 
 #define SIZE 1000 * 1000 * 200
-#define LOOP 20
 
 #define BLOCK_SIZE 256
 
@@ -112,7 +112,14 @@ void initialize_data(float* x, float* y, int size) {
   }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  // Get LOOP value from command line argument
+  int loop = 50;  // Default value
+  if (argc > 1) {
+    loop = atoi(argv[1]);
+  }
+  cout << "LOOP: " << loop << endl;
+
   // Allocate memory for arrays a, b, and c on the host
   float* x = new float[SIZE];
   float* y = new float[SIZE];
@@ -128,7 +135,7 @@ int main() {
 
   auto vector_add_cuda = VectorAdditionCUDA<float>(SIZE);
 
-  for (int i = 0; i < LOOP; i++) {
+  for (int i = 0; i < loop; i++) {
     cout << "." << flush;
     vector_add_cuda.run_kernel(x, y, out);
   }

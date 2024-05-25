@@ -15,4 +15,4 @@ g++ --std=c++17 vector_add_opencl.cpp -framework OpenCL -o vector_add_opencl.ex
 [ $? -eq 0 ] || { echo "Compilation failed!"; exit 1; }
 
 echo "Running OpenCL executables..."
-./vector_add_opencl.ex
+./vector_add_opencl.ex $@

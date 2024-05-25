@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Reference: https://www.intel.com/content/www/us/en/developer/tools/isa-extensions/overview.html
 
 # Function to compile with specific instruction set
 echo
@@ -19,4 +20,4 @@ g++ --std=c++17 -mavx512f vector_add_cpu_avx.cpp -o vector_add_cpu_avx.ex
 # Run the CPU and GPU executables
 echo "Running CPU/AVX executables..."
 
-./vector_add_cpu_avx.ex
+./vector_add_cpu_avx.ex $@

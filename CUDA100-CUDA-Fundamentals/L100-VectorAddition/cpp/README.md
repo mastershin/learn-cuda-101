@@ -1,8 +1,8 @@
-# Vector Addition
+# Vector Addition using CUDA, CPU, CPU/multi-core and CPU/AVX
 Demonstrates the addition of two 1D float arrays in C/C++ and Python.
 The code measures the speed at which two 1D vectors can be added.
 
-## Performance
-| Device | CPU | CPU/multi-threads | CPU/AVX2 | CUDA (1080ti) | CUDA (RTX8000) | CUDA (A100) |
+## Performance (100 loops, 200 million elements)
+| Device | CPU | CPU/multi-core | CPU/AVX2 | CUDA (1080ti) | CUDA (RTX8000) | CUDA (A100) |
 | - | - | - | - | - | - | - |
-| Apple M1 | 5.3 sec | 0.93 sec (10 threads) | - | - | - | - |
+| Apple M1 | 26.3 sec | 4.5 sec (10 threads) | - | - | - | - |

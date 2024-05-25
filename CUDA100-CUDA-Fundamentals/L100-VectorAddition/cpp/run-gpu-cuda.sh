@@ -15,4 +15,4 @@ nvcc vector_add_gpu.cu -o vector_add_gpu.ex
 [ $? -eq 0 ] || { echo "Compilation failed!"; exit 1; }
 
 echo "Running GPU executables..."
-./vector_add_gpu.ex
+./vector_add_gpu.ex $@

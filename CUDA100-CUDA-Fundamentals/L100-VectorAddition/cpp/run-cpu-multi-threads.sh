@@ -16,4 +16,4 @@ g++ --std=c++20 vector_add_cpu_threads.cpp -o vector_add_cpu_threads.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU/Multi-threads executables..."
-./vector_add_cpu_threads.ex
+./vector_add_cpu_threads.ex $@

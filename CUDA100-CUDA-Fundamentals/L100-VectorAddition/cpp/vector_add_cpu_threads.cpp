@@ -3,10 +3,10 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <cstdlib> // For atoi
 
 // 1000 * 1000 * 200 (float) --> takes about ~2 GB of memory
 #define SIZE 1000 * 1000 * 200
-#define LOOP 20
 
 using namespace std;
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
@@ -68,7 +68,14 @@ unsigned int get_num_threads() {
   return thread::hardware_concurrency();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+  // Get LOOP value from command line argument
+  int loop = 50; // Default value
+  if (argc > 1) {
+    loop = atoi(argv[1]);
+  }
+  cout << "LOOP: " << loop << endl;
+
   // Allocate memory for vector a and b
   float* x = new float[SIZE];
   float* y = new float[SIZE];
@@ -89,7 +96,7 @@ int main() {
   // CPU vector addition
   auto start_cpu = now();
 
-  for (int i = 0; i < LOOP; i++) {
+  for (int i = 0; i < loop; i++) {
     cout << "." << flush;
     cpuVectorAdd(x, y, out, SIZE, num_threads);  // Threads are launched here
   }
