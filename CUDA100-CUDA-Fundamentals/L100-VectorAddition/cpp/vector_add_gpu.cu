@@ -3,6 +3,7 @@
 #include <cstdlib>  // For atoi
 #include <iostream>
 
+// 200 million float consumes GPU memory of ~2.72 Gig
 #define SIZE 1000 * 1000 * 200
 
 #define BLOCK_SIZE 256
@@ -125,8 +126,11 @@ int main(int argc, char* argv[]) {
   // Start GPU timer
   auto start_gpu = now();
 
+  // CUDA memory is allocated only once.
   auto vector_add_cuda = VectorAdditionCUDA<float>(SIZE);
 
+  // Run the kernel multiple times, but there will be a lot of
+  // overhead due to memory transfer between host and device.
   for (int i = 0; i < loop; i++) {
     cout << "." << flush;
     vector_add_cuda.run_kernel((const float*)x, (const float*)y, out);
