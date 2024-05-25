@@ -14,6 +14,7 @@ else
 fi
 
 g++ --std=c++17 -mavx512f vector_add_cpu_avx.cpp -o vector_add_cpu_avx.ex
+[ $? -eq 0 ] || { echo "Compilation failed!"; exit 1; }
 
 # Run the CPU and GPU executables
 echo "Running CPU/AVX executables..."

@@ -10,10 +10,10 @@ if ! command -v g++ >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "g++ found. Compiling CPU code..."
-g++ --std=c++17 vector_add_cpu.cpp -o vector_add_cpu.ex
+echo "g++ found. Compiling CPU/Multi-threads code..."
+g++ --std=c++20 vector_add_cpu_threads.cpp -o vector_add_cpu_threads.ex
 [ $? -eq 0 ] || { echo "Compilation failed!"; exit 1; }
 
 # Run the CPU and GPU executables
-echo "Running CPU executables..."
-./vector_add_cpu.ex
+echo "Running CPU/Multi-threads executables..."
+./vector_add_cpu_threads.ex
