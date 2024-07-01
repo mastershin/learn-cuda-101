@@ -1,0 +1,13 @@
+.*
+data/
+**/models/
+.ipynb_checkpoints/
+flagged/
+*nogit*
+**/logs/
+**/results/
+__pycache__/
+*.pyc
+*.ex
+*.exe
+!.gitignore
