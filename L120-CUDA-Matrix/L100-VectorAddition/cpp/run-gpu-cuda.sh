@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CUDA: https://developer.nvidia.com/cuda-downloads"
+# CUDA: https://developer.nvidia.com/cuda-downloads
 # Reference: https://github.com/nvidia/cuda-samples
 
 # Check for nvcc compiler
