@@ -1,8 +1,8 @@
 # Fundamentals
 
-1. **Vector Addition:** The "Hello World" of GPU programming. Add two arrays element-wise on the GPU, illustrating data transfer and kernel execution.
-    * Python: Use libraries like CuPy or PyCUDA.
-    * C/C++: Direct CUDA API interaction.
+1. **L120: Vector Addition:** The "Hello World" of GPU programming. Add two arrays element-wise on the GPU, illustrating data transfer and kernel execution.
+    * C/C++: Use CPU AVX, Multi threading, CUDA
+    * Python: Use libraries cuda-python
     * Rust: Explore rust-cuda or accelerate.
 2. **Matrix Multiplication:**  A step up in complexity, showcasing thread organization and memory access patterns for performance.
     * Python: NumPy-like syntax with CuPy.

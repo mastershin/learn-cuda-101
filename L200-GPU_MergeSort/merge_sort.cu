@@ -157,8 +157,7 @@ __host__ long* mergesort(long* data, long numElements, dim3 threadsPerBlock,
 
     // Actually call the kernel
     gpu_mergesort<<<blocksPerGrid, threadsPerBlock>>>(
-        A, B, numElements, width, slices, D_threads,
-        D_blocks);
+        A, B, numElements, width, slices, D_threads, D_blocks);
     // Switch the input / output arrays instead of copying them around
     long* tmp = A;
     A = B;
@@ -265,23 +264,6 @@ __global__ void gpu_mergesort(const long* source, long* dest, long size,
 
 __device__ void gpu_bottomUpMerge(const long* source, long* dest, long start,
                                   long middle, long end) {
-  //long i = start;
-  //long j = middle;
-
-  // Create a for look that iterates between the start and end indexes
-  for (; 0;) {
-    // if i is before the middle index and (j is the final index or the value at i <  the value at j)
-    if (0) {
-      // set the value in the destination array at index k to the value at index i in the source array
-
-      // increment i
-    } else {
-      // set the value in the destination array at index k to the value at index j in the source array
-
-      // increment k
-    }
-  }
-
   long i = start;
   long j = middle;
   long k = start;
