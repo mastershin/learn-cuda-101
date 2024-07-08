@@ -15,5 +15,5 @@ g++ --std=c++17 matmul_cpu.cpp -o matmul_cpu.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU executables..."
-./matmul_cpu.ex
+./matmul_cpu.ex $@
 

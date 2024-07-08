@@ -1,12 +1,12 @@
 # Fundamentals
 
-1. **L120: Vector Addition:** The "Hello World" of GPU programming. Add two arrays element-wise on the GPU, illustrating data transfer and kernel execution.
+1. **L100: Vector Addition:** The "Hello World" of GPU programming. Add two arrays element-wise on the GPU, illustrating data transfer and kernel execution.
     * C/C++: Use CPU AVX, Multi threading, CUDA
     * Python: Use libraries cuda-python
     * Rust: Explore rust-cuda or accelerate.
-2. **Matrix Multiplication:**  A step up in complexity, showcasing thread organization and memory access patterns for performance.
-    * Python: NumPy-like syntax with CuPy.
+2. **L110: Matrix Multiplication:**  A step up in complexity, showcasing thread organization and memory access patterns for performance.
     * C/C++: Implement tiled matrix multiplication.
+    * Python: NumPy-like syntax with CuPy.
     * Rust: Leverage ndarray crate for matrix operations.
 3. **Array Reduction (Sum/Max/Min):** Learn to efficiently combine data from multiple threads, introducing reduction techniques and atomic operations.
     * Python:  CuPy's reduction functions.
@@ -41,3 +41,22 @@
 * **Explain Concepts:**  Emphasize data parallelism, kernel execution, memory management, and how CUDA differs from traditional programming.
 * **Language Focus:** Choose one primary language (like Python with CuPy) and potentially show snippets or concepts in others to illustrate different approaches.
 * **Visualization:** Where applicable, link results to visual outputs (images, charts) to make the learning process more engaging. 
+
+
+## For cuDF Installation
+### pip, CUDA12
+```
+## Install cuDF, using pip, CUDA 12.0
+pip install \
+    --extra-index-url=https://pypi.nvidia.com \
+    cudf-cu12==24.6.* dask-cudf-cu12==24.6.* cuml-cu12==24.6.* \
+    cugraph-cu12==24.6.* cuspatial-cu12==24.6.* cuproj-cu12==24.6.* \
+    cuxfilter-cu12==24.6.* cucim-cu12==24.6.* pylibraft-cu12==24.6.* \
+    raft-dask-cu12==24.6.* cuvs-cu12==24.6.*
+```
+
+### Conda, Python 3.11, CUDA 12.0
+```
+conda create -n rapids-24.06 -c rapidsai -c conda-forge -c nvidia  \
+    rapids=24.06 python=3.11 cuda-version=12.0
+```

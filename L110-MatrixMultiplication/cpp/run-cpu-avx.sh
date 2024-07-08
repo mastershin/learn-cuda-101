@@ -27,4 +27,4 @@ g++ --std=c++17 -mavx -mavx2 -mavx512f -mfma matmul_cpu_avx.cpp -o matmul_cpu_av
 
 # Run the CPU and GPU executables
 echo "Running CPU (AVX=$1) executables..."
-./matmul_cpu_avx.ex
+./matmul_cpu_avx.ex $@

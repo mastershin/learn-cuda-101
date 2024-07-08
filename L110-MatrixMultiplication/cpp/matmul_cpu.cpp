@@ -6,7 +6,9 @@ A x B = C
 */
 #include <cassert>
 #include <chrono>
+#include <cstdlib>  // For atoi
 #include <iostream>
+#include <tuple>
 
 #include "test_maumul.h"
 
@@ -91,18 +93,47 @@ void get_large_matrix_size(int& m, int& n, int& k) {
   k = 1024;
 }
 
-// ----------------- Main Function -----------------
+std::tuple<int, int, int> parse_command_args(int argc, char* argv[]) {
+  int m, n, k;
 
-int main() {
+  if (argc == 2) {
+    std::string size_arg = argv[1];
+    if (size_arg == "s") {
+      get_small_matrix_size(m, n, k);
+    } else if (size_arg == "m") {
+      get_medium_matrix_size(m, n, k);
+    } else if (size_arg == "l") {
+      get_large_matrix_size(m, n, k);
+    } else {
+      std::cerr
+          << "Invalid size argument. Use 's', 'm', 'l' or specify dimensions."
+          << std::endl;
+      exit(1);
+    }
+  } else if (argc == 4) {
+    m = std::atoi(argv[1]);
+    n = std::atoi(argv[2]);
+    k = std::atoi(argv[3]);
+  } else {
+    std::cerr << "Invalid arguments. Use 's', 'm', 'l' for predefined sizes or "
+                 "specify dimensions m, n, k."
+              << std::endl;
+    exit(1);
+  }
+
+  return std::make_tuple(m, n, k);
+}
+
+int main(int argc, char* argv[]) {
+
+  auto [m, n, k] = parse_command_args(argc, argv);
+
+  std::cout << "Matrix Multiplication: A(" << m << "x" << k << ") * B(" << k
+            << "x" << n << ") = C(" << m << "x" << n << ")" << std::endl;
+
   test_matmul(matmul_cpu);
 
-  int m, n, k;
   // Allocate memory for matrices A, B, and C
-
-  get_small_matrix_size(m, n, k);
-  // get_medium_matrix_size(m, n, k);
-  // get_large_matrix_size(m, n, k);
-
   float *A, *B, *C;
 
   // Initialize vectors a and b
