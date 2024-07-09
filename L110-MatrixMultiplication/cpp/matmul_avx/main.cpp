@@ -9,6 +9,7 @@ A x B = C
 #include <cstdlib>  // For atoi
 #include <iostream>
 #include <tuple>
+#include <cmath>
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>

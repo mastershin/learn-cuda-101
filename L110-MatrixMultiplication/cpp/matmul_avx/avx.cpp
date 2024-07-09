@@ -1,33 +1,38 @@
 #include "avx.h"
 
-void cpuid(int registers[4], int function_id) {
-#if defined(_WIN32) || defined(_WIN64)
-  __cpuid(registers, function_id);
-#else
-  __cpuid(function_id, registers[0], registers[1], registers[2], registers[3]);
+void cpuid(int registers[4], int function_id, int subfunction_id = 0) {
+#ifdef _WIN32
+  __cpuidex(registers, function_id, subfunction_id);
+#elif defined(__linux__) || defined(__APPLE__)
+  __cpuid_count(function_id, subfunction_id, registers[0], registers[1],
+                registers[2], registers[3]);
 #endif
+}
+
+bool check_osxsave() {
+  int registers[4];
+  cpuid(registers, 1);
+  return (registers[2] & (1 << 27)) != 0;
+}
+
+bool check_xcr_feature_mask() {
+  unsigned long long xcrFeatureMask =
+      _xgetbv(0);  // Use 0 instead of _XCR_XFEATURE_ENABLED_MASK
+  return (xcrFeatureMask & 0x6) == 0x6;
+}
+
+bool check_xcr_feature_mask_avx512() {
+  unsigned long long xcrFeatureMask = _xgetbv(0);
+  return (xcrFeatureMask & 0xe6) == 0xe6;
 }
 
 bool detect_avx() {
   int registers[4];
-  cpuid(registers, 0);
-
-  if (registers[0] < 1) {
-    return false;
-  }
-
   cpuid(registers, 1);
-  bool osxsave = (registers[2] & (1 << 27)) != 0;
   bool avx = (registers[2] & (1 << 28)) != 0;
 
-  if (osxsave && avx) {
-    unsigned long long xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-    return (xcrFeatureMask & 0x6) == 0x6;
-  }
-
-  return false;
+  return check_osxsave() && avx && check_xcr_feature_mask();
 }
-
 bool detect_avx2() {
   int registers[4];
   cpuid(registers, 0);
@@ -36,47 +41,37 @@ bool detect_avx2() {
     return false;
   }
 
-  cpuid(registers, 1);
-  bool osxsave = (registers[2] & (1 << 27)) != 0;
-
   cpuid(registers, 7);
   bool avx2 = (registers[1] & (1 << 5)) != 0;
 
-  if (osxsave && avx2) {
-    unsigned long long xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-    return (xcrFeatureMask & 0x6) == 0x6;
-  }
-
-  return false;
+  return check_osxsave() && avx2 && check_xcr_feature_mask();
 }
 
 bool detect_avx512() {
-  int registers[4];
-
-  // Get the highest function parameter for CPUID
-  cpuid(registers, 0);
-  if (registers[0] < 7) {
+  // Check for CPUID level 7 support
+  int cpuid_info[4] = {0};
+  cpuid(cpuid_info, 1);
+  if (cpuid_info[0] < 7) {
+    std::cout << "CPUID level 7 is not supported" << std::endl;
     return false;
   }
 
-  // Check if OS has enabled XGETBV
-  cpuid(registers, 1);
-  bool osxsave = (registers[2] & (1 << 27)) != 0;
-  if (!osxsave) {
+  // Check for XCR support for AVX512
+  // Check for the essential bits for AVX-512 (XMM, YMM, and ZMM support)
+  unsigned long long xcr_feature_mask = _xgetbv(0);
+  if ((xcr_feature_mask & 0xe6) != 0xe6) {
+    std::cout << "XCR feature mask for AVX512 is not supported" << std::endl;
     return false;
   }
 
-  // Check for AVX-512 support in CPUID leaf 7
-  cpuid(registers, 7);
-  bool avx512f = (registers[1] & (1 << 16)) != 0;
-  if (!avx512f) {
+  // Check for OS XSAVE support
+  bool os_xsave_supported = check_osxsave();
+  if (!os_xsave_supported) {
+    std::cout << "OS XSAVE is not supported" << std::endl;
     return false;
   }
 
-  // Check if OS has enabled AVX-512 by examining XCR0
-  unsigned long long xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-  // Check if the OS has enabled the necessary AVX-512 features (XMM, YMM, ZMM)
-  return (xcrFeatureMask & 0xe6) == 0xe6;
+  return true;
 }
 
 void print_avx_features() {
