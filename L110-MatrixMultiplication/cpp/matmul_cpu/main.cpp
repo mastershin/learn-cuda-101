@@ -4,15 +4,19 @@ Multiplies Matrices A, B, C with sizes m x k, k x n, m x n)
 A x B = C
 
 */
+
 #include <cassert>
 #include <chrono>
 #include <cstdlib>  // For atoi
 #include <iostream>
 #include <tuple>
 
-#include "test_maumul.h"
+#include "matmul_cpu.h"
+
+#include "test_matmul.h"
 
 #define LOOP 200
+#define TOLERANCE 1e-5  // Tolerance for floating-point comparison
 
 using namespace std;
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
@@ -20,21 +24,10 @@ using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 time_point now() {
   return std::chrono::high_resolution_clock::now();
 }
+
 auto time_diff(time_point a, time_point b) {
   // Return Type: std::chrono::duration<double>
   return std::chrono::duration_cast<std::chrono::duration<double>>(b - a);
-}
-
-// Classic CPU matrix multiplication using for loop (slow)
-void matmul_cpu(const float* A, const float* B, float* C, int m, int n, int k) {
-  for (int i = 0; i < m; ++i) {
-    for (int j = 0; j < k; ++j) {
-      C[i * k + j] = 0.0f;
-      for (int p = 0; p < n; ++p) {
-        C[i * k + j] += A[i * n + p] * B[p * k + j];
-      }
-    }
-  }
 }
 
 void initialize_data(float*& A, float*& B, float*& C, int& m, int& n, int& k) {
@@ -91,6 +84,15 @@ void get_large_matrix_size(int& m, int& n, int& k) {
   m = 4096;
   n = 1024;
   k = 1024;
+}
+
+bool verify_result(const float* C1, const float* C2, int m, int n) {
+  for (int i = 0; i < m * n; ++i) {
+    if (std::fabs(C1[i] - C2[i]) > TOLERANCE) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::tuple<int, int, int> parse_command_args(int argc, char* argv[]) {
@@ -152,7 +154,7 @@ int main(int argc, char* argv[]) {
   cout << std::endl;
   cout << "CPU time: " << duration.count() << " seconds" << endl;
 
-  float sum;
+  float sum = 0.0;
   for (int i = 0; i < m * n; ++i) {
     sum += C[i];
   }

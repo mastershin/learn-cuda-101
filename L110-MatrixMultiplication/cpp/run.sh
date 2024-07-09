@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-./run-cpu.sh $@
+./matmul_cpu/run-cpu.sh $@
 
-./run-cpu-avx.sh $@
+./matmul_avx/run-cpu-avx.sh $@
 
-./run-gpu-cuda.sh $@
+./matmul_cuda/run-gpu-cuda.sh $@
