@@ -9,6 +9,18 @@
 #define BLOCK_SIZE 256
 #define LOOP 200
 
+#define gpuErrorCheck(ans) \
+  { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char* file, int line,
+                      bool abort = true) {
+  if (code != cudaSuccess) {
+    fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file,
+            line);
+    if (abort)
+      exit(code);
+  }
+}
+
 // Utility function to get the current time in seconds
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
@@ -21,7 +33,8 @@ auto time_diff(time_point a, time_point b) {
 }
 
 // GPU kernel for vector addition
-__global__ void gpuVectorAdd(float a, int* x, int* y, int* out, int size) {
+__global__ void gpuVectorAdd(float a, float* x, float* y, float* out,
+                             int size) {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < size) {
     out[idx] = a * x[idx] + y[idx];
@@ -31,14 +44,16 @@ __global__ void gpuVectorAdd(float a, int* x, int* y, int* out, int size) {
 // Function to perform vector addition on the GPU
 void performVectorAddition(float a, float* x, float* y, float* out, int size) {
   // Allocate memory for arrays d_a, d_b, and d_c on the device
-  int *d_x, *d_y, *d_out;
-  cudaMalloc((void**)&d_x, size * sizeof(float));
-  cudaMalloc((void**)&d_y, size * sizeof(float));
-  cudaMalloc((void**)&d_out, size * sizeof(float));
+  float *d_x, *d_y, *d_out;
+  gpuErrorCheck(cudaMalloc((void**)&d_x, size * sizeof(float)));
+  gpuErrorCheck(cudaMalloc((void**)&d_y, size * sizeof(float)));
+  gpuErrorCheck(cudaMalloc((void**)&d_out, size * sizeof(float)));
 
   // Copy vectors a and b from host to device
-  cudaMemcpy(d_x, x, size * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_x, y, size * sizeof(float), cudaMemcpyHostToDevice);
+  gpuErrorCheck(
+      cudaMemcpy(d_x, x, size * sizeof(float), cudaMemcpyHostToDevice));
+  gpuErrorCheck(
+      cudaMemcpy(d_x, y, size * sizeof(float), cudaMemcpyHostToDevice));
 
   // Calculate the number of blocks needed
   int numBlocks = (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
@@ -50,12 +65,13 @@ void performVectorAddition(float a, float* x, float* y, float* out, int size) {
   cudaDeviceSynchronize();
 
   // Copy vector c from device to host
-  cudaMemcpy(out, d_out, size * sizeof(int), cudaMemcpyDeviceToHost);
+  gpuErrorCheck(
+      cudaMemcpy(out, d_out, size * sizeof(float), cudaMemcpyDeviceToHost));
 
   // Free memory on the device
-  cudaFree(d_x);
-  cudaFree(d_y);
-  cudaFree(d_out);
+  gpuErrorCheck(cudaFree(d_x));
+  gpuErrorCheck(cudaFree(d_y));
+  gpuErrorCheck(cudaFree(d_out));
 }
 
 void initialize_data(float* x, float* y, int size) {
@@ -130,9 +146,15 @@ int main(int argc, char* argv[]) {
 
   // Allocate memory for arrays a, b, and c on the host
   float a = 2.0;
-  float* x = new float[SIZE];
-  float* y = new float[SIZE];
-  float* out = new float[SIZE];
+
+  //   float* x = new float[SIZE];
+  //   float* y = new float[SIZE];
+  //   float* out = new float[SIZE];
+
+  float *x, *y, *out;
+  gpuErrorCheck(cudaMallocHost(&x, SIZE * sizeof(float)));
+  gpuErrorCheck(cudaMallocHost(&y, SIZE * sizeof(float)));
+  gpuErrorCheck(cudaMallocHost(&out, SIZE * sizeof(float)));
 
   // Initialize vectors a and b
   initialize_data(x, y, SIZE);
@@ -155,9 +177,13 @@ int main(int argc, char* argv[]) {
   std::cout << "GPU time: " << gpu_duration.count() << " seconds" << std::endl;
 
   // Clean up memory on the host
-  delete[] x;
-  delete[] y;
-  delete[] out;
+  //delete[] x;
+  //delete[] y;
+  //delete[] out;
+
+  cudaFreeHost(x);
+  cudaFreeHost(y);
+  cudaFreeHost(out);
 
   return 0;
 }

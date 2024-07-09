@@ -8,9 +8,9 @@
     * C/C++: Implement tiled matrix multiplication.
     * Python: NumPy-like syntax with CuPy.
     * Rust: Leverage ndarray crate for matrix operations.
-3. **Array Reduction (Sum/Max/Min):** Learn to efficiently combine data from multiple threads, introducing reduction techniques and atomic operations.
-    * Python:  CuPy's reduction functions.
+3. **L120: Array Reduction (Sum/Max/Min):** Learn to efficiently combine data from multiple threads, introducing reduction techniques and atomic operations.
     * C/C++: Explore different reduction approaches.
+    * Python: CuPy's reduction functions.    
     * Rust: Use Rayon for parallel iteration and reduction.
 
 # Image Processing
