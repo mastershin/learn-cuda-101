@@ -93,8 +93,8 @@ void get_large_matrix_size(int& m, int& n, int& k) {
   k = 1024;
 }
 
-bool verify_result(const float* C1, const float* C2, int m, int n) {
-  for (int i = 0; i < m * n; ++i) {
+bool verify_result(const float* C1, const float* C2, int m, int n, int k) {
+  for (int i = 0; i < m * k; ++i) {
     if (std::fabs(C1[i] - C2[i]) > TOLERANCE) {
       std::cerr << C1[i] << " vs " << C2[i] << " at i=" << i << std::endl;
       return false;
@@ -162,7 +162,7 @@ void _verify_matmul_avx(int m, int n, int k) {
   if (detect_avx512()) {
     float* C_avx512 = new float[m * n]{0.0f};
     matmul_AVX512(A, B, C_avx512, m, n, k);
-    if (!verify_result(C_cpu, C_avx512, m, n)) {
+    if (!verify_result(C_cpu, C_avx512, m, n, k)) {
       std::cerr << "Verification failed for AVX-512" << std::endl;
       delete[] A;
       delete[] B;
@@ -180,7 +180,7 @@ void _verify_matmul_avx(int m, int n, int k) {
   if (detect_avx2()) {
     float* C_avx2 = new float[m * n]{0.0f};
     matmul_AVX2(A, B, C_avx2, m, n, k);
-    if (!verify_result(C_cpu, C_avx2, m, n)) {
+    if (!verify_result(C_cpu, C_avx2, m, n, k)) {
       std::cerr << "Verification failed for AVX2 (256 bit)" << std::endl;
       delete[] A;
       delete[] B;
@@ -198,7 +198,7 @@ void _verify_matmul_avx(int m, int n, int k) {
   if (detect_avx()) {
     float* C_avx = new float[m * n]{0.0f};
     matmul_AVX2(A, B, C_avx, m, n, k);
-    if (!verify_result(C_cpu, C_avx, m, n)) {
+    if (!verify_result(C_cpu, C_avx, m, n, k)) {
       std::cerr << "Verification failed for AVX (128 bit)" << std::endl;
       delete[] A;
       delete[] B;

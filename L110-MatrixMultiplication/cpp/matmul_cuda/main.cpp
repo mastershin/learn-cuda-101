@@ -86,8 +86,8 @@ void get_large_matrix_size(int& m, int& n, int& k) {
   k = 1024;
 }
 
-bool verify_result(const float* C1, const float* C2, int m, int n) {
-  for (int i = 0; i < m * n; ++i) {
+bool verify_result(const float* C1, const float* C2, int m, int n, int k) {
+  for (int i = 0; i < m * k; ++i) {
     if (std::fabs(C1[i] - C2[i]) > TOLERANCE) {
       return false;
     }
