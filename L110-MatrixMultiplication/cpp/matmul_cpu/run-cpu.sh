@@ -11,7 +11,7 @@ if ! command -v g++ >/dev/null 2>&1; then
 fi
 
 echo "g++ found. Compiling CPU code..."
-g++ --std=c++17 matmul_cpu.cpp -o matmul_cpu.ex
+g++ --std=c++17 main.cpp matmul_cpu.cpp -o matmul_cpu.ex
 
 # Run the CPU and GPU executables
 echo "Running CPU executables..."

@@ -6,7 +6,6 @@ A x B = C
 
 #include <cassert>
 #include <chrono>
-#include <cstdlib>  // For atoi
 #include <iostream>
 #include <tuple>
 #include <cmath>
@@ -121,9 +120,9 @@ std::tuple<int, int, int> parse_command_args(int argc, char* argv[]) {
       exit(1);
     }
   } else if (argc == 4) {
-    m = std::atoi(argv[1]);
-    n = std::atoi(argv[2]);
-    k = std::atoi(argv[3]);
+    m = std::stoi(argv[1]);
+    n = std::stoi(argv[2]);
+    k = std::stoi(argv[3]);
   } else {
     std::cerr << "Invalid arguments. Use 's', 'm', 'l' for predefined sizes or "
                  "specify dimensions m, n, k."
