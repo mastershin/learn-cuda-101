@@ -46,10 +46,10 @@ void matmul_AVX512(const float* A, const float* B_row, float* C, int m, int n,
       // Handle remaining elements
       float remaining_sum = 0.0f;
       for (; l < n; ++l) {
-        std::cout << m << "," << n << "," << k << " i=" << i << " j=" << j
-                  << " l=" << l << " - " << i * n + l << ", " << j * n + l
-                  << " A=" << A[i * n + l] << " B=" << B[j * n + l]
-                  << std::endl;
+        // std::cout << m << "," << n << "," << k << " i=" << i << " j=" << j
+        //           << " l=" << l << " - " << i * n + l << ", " << j * n + l
+        //           << " A=" << A[i * n + l] << " B=" << B[j * n + l]
+        //           << std::endl;
         remaining_sum += A[i * n + l] * B[j * n + l];
         // std::cout << " remaining_sum=" << remaining_sum << std::endl;
       }
