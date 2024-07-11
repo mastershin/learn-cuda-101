@@ -1,7 +1,7 @@
 # Define variables
 NVCC = nvcc
 GCC = g++
-CXXFLAGS = -std=c++17
+CXXFLAGS = -std=c++17 -I/usr/local/cuda/include
 CUDA_FLAGS = -I/usr/local/cuda/include -Xcompiler -fPIC
 # CUDA_LIBS = $(shell pkg-config --libs cuda)
 CUDA_LIBS = -lcuda
