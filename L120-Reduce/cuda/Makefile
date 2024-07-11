@@ -1,9 +1,9 @@
 # Define variables
 NVCC = nvcc
 GCC = g++
-CXXFLAGS = -std=c++17 -g
+CXXFLAGS = -std=c++17 -g -I/usr/local/cuda/include
 # CUDA_FLAGS = -arch=sm_75 -Xcompiler -fPIC
-CUDA_FLAGS = -Xcompiler -fPIC
+CUDA_FLAGS = -Xcompiler -fPIC -I/usr/local/cuda/include
 # CUDA architecture flags
 ARCH_FLAGS = \
     -gencode arch=compute_60,code=sm_60 \

@@ -139,15 +139,17 @@ __global__ void cuda_avg_kernel(float* d_data, float* d_result, int N) {
   }
 }
 
-__global__ void cuda_median_kernel(float* d_data, float* d_result, int N) {
-  // Calculate the thread ID and block ID
-  int tid = threadIdx.x + blockIdx.x * blockDim.x;
+// Median Kernel doesn't need to be run in parallel
+// if we sort the data first.
+// __global__ void cuda_median_kernel(float* d_data, float* d_result, int N) {
+//   // Calculate the thread ID and block ID
+//   int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-  // Calculate the median based on the sorted data
-  if (tid == N / 2) {
-    *d_result = d_data[tid];
-  }
-}
+//   // Calculate the median based on the sorted data
+//   if (tid == N / 2) {
+//     *d_result = d_data[tid];
+//   }
+// }
 
 void sum_kernel(float* d_data, float* d_result, int N) {
   cuda_sum_kernel<<<(N + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
@@ -158,10 +160,10 @@ void avg_kernel(float* d_data, float* d_result, int N) {
   cuda_avg_kernel<<<(N + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
       d_data, d_result, N);
 }
-void median_kernel(float* d_data, float* d_result, int N) {
-  cuda_median_kernel<<<(N + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
-      d_data, d_result, N);
-}
+// void median_kernel(float* d_data, float* d_result, int N) {
+//   cuda_median_kernel<<<(N + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
+//       d_data, d_result, N);
+// }
 
 // GPU Kernel for Bitonic Sort
 __global__ void cuda_bitonic_sort_step(float* d_data, int j, int k, int N) {

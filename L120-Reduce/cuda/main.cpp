@@ -7,7 +7,6 @@
 #include <string>
 #include <thread>
 
-#include <cuda_runtime.h>
 #include "reduce.h"
 
 int parse_size(const std::string& size_str) {
@@ -100,8 +99,8 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < num_threads; ++i) {
       float* start = h_data + i * chunk_size;
       float* end = std::min(start + chunk_size, h_data + N);
-      std::cout << "Thread " << i << ": start = " << start << ", end = " << end
-                << std::endl;
+      // std::cout << "Thread " << i << ": start = " << start << ", end = " << end
+      //           << std::endl;
       threads[i] = std::thread(fill_random, start, end);
     }
 
@@ -130,20 +129,19 @@ int main(int argc, char* argv[]) {
   if (operation == "sum") {
     sum_kernel(d_data, d_result, N);
   } else if (operation == "min") {
-    // float init_val = std::numeric_limits<float>::max();
-    // gpuErrorCheck(
-    //     cudaMemcpy(d_result, &init_val, sizeof(float), cudaMemcpyHostToDevice));
     min_kernel(d_data, d_result, N);
   } else if (operation == "max") {
-    // float init_val = std::numeric_limits<float>::min();
-    // gpuErrorCheck(
-    //     cudaMemcpy(d_result, &init_val, sizeof(float), cudaMemcpyHostToDevice));
     max_kernel(d_data, d_result, N);
   } else if (operation == "avg" || operation == "mean") {
     avg_kernel(d_data, d_result, N);
   } else if (operation == "median") {
     bitonic_sort(d_data, N);
-    median_kernel(d_data, d_result, N);
+    // median_kernel(d_data, d_result, N);
+    int idx = (N / 2);
+    gpuErrorCheck(
+        cudaMemcpy(h_data + idx, d_data + idx, sizeof(float), cudaMemcpyDeviceToHost));
+    std::cout << "Median: " << h_data[idx] << " at " << idx << std::endl;
+
   } else if (operation == "sort") {
 
     // TODO: bitonic sort work with multiple of 2 size,
@@ -184,7 +182,7 @@ int main(int argc, char* argv[]) {
   // Stop the timer
   auto end = std::chrono::high_resolution_clock::now();
 
-  if (operation != "sort") {
+  if (operation != "sort" && operation != "median") {
     // Copy the result from device to host
     gpuErrorCheck(
         cudaMemcpy(&h_result, d_result, sizeof(float), cudaMemcpyDeviceToHost));
