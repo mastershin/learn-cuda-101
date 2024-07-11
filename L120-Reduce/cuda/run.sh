@@ -1,2 +1,5 @@
 #!/usr/bin/env bash
-./reduce.ex 500m avg
+ARRAY_SIZE=500m
+for op in min max avg median sort; do
+./reduce.ex $ARRAY_SIZE $op
+done

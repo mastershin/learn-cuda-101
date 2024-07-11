@@ -1,5 +1,5 @@
-#include <float.h>
 #include <cuda_runtime.h>
+#include <float.h>
 //#include <algorithm>
 //#include <chrono>
 //#include <cmath>
@@ -50,7 +50,7 @@ __global__ void cuda_min_kernel(float* d_data, float* d_result, int N) {
   if (tid < N) {
     block_min = d_data[i];
   } else {
-    block_min = FLT_MAX; // Initialize with a large value
+    block_min = FLT_MAX;  // Initialize with a large value
   }
   __syncthreads();
 
@@ -73,7 +73,8 @@ void min_kernel(float* d_data, float* d_result, int N) {
       d_data, d_result, N);
 
   // Perform global reduction (using a single block with all threads)
-  cuda_min_kernel<<<1, BLOCK_SIZE>>>(d_result, d_result, (N + BLOCK_SIZE - 1) / BLOCK_SIZE); 
+  cuda_min_kernel<<<1, BLOCK_SIZE>>>(d_result, d_result,
+                                     (N + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
   // Final result is stored in d_result[0]
 }
@@ -90,7 +91,7 @@ __global__ void cuda_max_kernel(float* d_data, float* d_result, int N) {
   if (tid < N) {
     block_max = d_data[i];
   } else {
-    block_max = -FLT_MAX; // Initialize with a small value
+    block_max = -FLT_MAX;  // Initialize with a small value
   }
   __syncthreads();
 
@@ -113,7 +114,8 @@ void max_kernel(float* d_data, float* d_result, int N) {
       d_data, d_result, N);
 
   // Perform global reduction (using a single block with all threads)
-  cuda_max_kernel<<<1, BLOCK_SIZE>>>(d_result, d_result, (N + BLOCK_SIZE - 1) / BLOCK_SIZE); 
+  cuda_max_kernel<<<1, BLOCK_SIZE>>>(d_result, d_result,
+                                     (N + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
   // Final result is stored in d_result[0]
 }
@@ -134,33 +136,6 @@ __global__ void cuda_avg_kernel(float* d_data, float* d_result, int N) {
   __syncthreads();
   if (tid == 0) {
     *d_result /= N;
-  }
-}
-
-// GPU Kernel for Bitonic Sort
-__global__ void cuda_bitonic_sort_step(float* d_data, int j, int k) {
-  unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
-  unsigned int ixj = tid ^ j;
-
-  /* The threads with the lowest ids sort the array. */
-  if (ixj > tid) {
-    if ((tid & k) == 0) {
-      /* Sort ascending */
-      if (d_data[tid] > d_data[ixj]) {
-        // Swap
-        float temp = d_data[tid];
-        d_data[tid] = d_data[ixj];
-        d_data[ixj] = temp;
-      }
-    } else {
-      /* Sort descending */
-      if (d_data[tid] < d_data[ixj]) {
-        // Swap
-        float temp = d_data[tid];
-        d_data[tid] = d_data[ixj];
-        d_data[ixj] = temp;
-      }
-    }
   }
 }
 
@@ -188,11 +163,41 @@ void median_kernel(float* d_data, float* d_result, int N) {
       d_data, d_result, N);
 }
 
+// GPU Kernel for Bitonic Sort
+__global__ void cuda_bitonic_sort_step(float* d_data, int j, int k, int N) {
+  unsigned int tid = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int ixj = tid ^ j;
+
+  // Ensure both tid and ixj are within bounds
+  //if (tid < N && ixj < N) 
+  {
+    /* The threads with the lowest ids sort the array. */
+    if (ixj > tid) {
+      if ((tid & k) == 0) {
+        /* Sort ascending */
+        if (d_data[tid] > d_data[ixj]) {
+          // Swap
+          float temp = d_data[tid];
+          d_data[tid] = d_data[ixj];
+          d_data[ixj] = temp;
+        }
+      } else {
+        /* Sort descending */
+        if (d_data[tid] < d_data[ixj]) {
+          // Swap
+          float temp = d_data[tid];
+          d_data[tid] = d_data[ixj];
+          d_data[ixj] = temp;
+        }
+      }
+    }
+  }
+}
 void bitonic_sort(float* d_data, int N) {
   for (int k = 2; k <= N; k <<= 1) {
     for (int j = k >> 1; j > 0; j = j >> 1) {
       cuda_bitonic_sort_step<<<(N + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE>>>(
-          d_data, j, k);
+          d_data, j, k, N);
       cudaDeviceSynchronize();
     }
   }
