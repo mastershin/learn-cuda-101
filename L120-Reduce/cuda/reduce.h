@@ -19,6 +19,6 @@ void sum_kernel(float* d_data, float* d_result, int N);
 void min_kernel(float* d_data, float* d_result, int N);
 void max_kernel(float* d_data, float* d_result, int N);
 void avg_kernel(float* d_data, float* d_result, int N);
-void median_kernel(float* d_data, float* d_result, int N);
+// void median_kernel(float* d_data, float* d_result, int N);
 
 void bitonic_sort(float* d_data, int N);
